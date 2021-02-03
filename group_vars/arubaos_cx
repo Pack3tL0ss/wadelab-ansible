@@ -1,4 +1,4 @@
-ansible_user: nms
+ansible_user: wade
 ansible_password: hpIMC!!!
 ansible_connection: httpapi
 ansible_network_os: aoscx
