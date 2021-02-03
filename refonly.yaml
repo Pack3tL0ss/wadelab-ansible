@@ -1,0 +1,39 @@
+---
+- hosts: 6300T
+  gather_facts: False
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name:
+      tags: ntp
+      block:
+        - name: Install ntp
+          ansible.builtin.yum:
+            name: ntp
+            state: present
+
+        - name: Configure ntp
+          ansible.builtin.template:
+            src: ntp.conf.j2
+            dest: /etc/ntp.conf
+          notify:
+          - restart ntpd
+
+    #   - name: Enable and run ntpd
+    #     ansible.builtin.service:
+    #       name: ntpd
+    #       state: started
+    #       enabled: yes
+
+    # - name: Install NFS utils
+    #   ansible.builtin.yum:
+    #     name:
+    #     - nfs-utils
+    #     - nfs-util-lib
+    #     state: present
+    #   tags: filesharing
+    # Adding tags to plays
+
+          # provider:
+          #   username: wade
+          #   ssh_keyfile: /home/wade/.ssh/id_rsa

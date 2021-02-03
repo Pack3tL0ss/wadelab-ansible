@@ -1,9 +1,0 @@
-ansible_user: wade
-ansible_password: hpIMC!!!
-ansible_connection: httpapi
-ansible_network_os: aoscx
-ansible_httpapi_use_ssl: True
-ansible_acx_no_proxy: True
-ansible_httpapi_validate_certs: False
-
-

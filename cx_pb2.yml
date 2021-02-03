@@ -1,14 +1,90 @@
-- hosts: arubaos_cx
+---
+- hosts: localhost
+  become: no
+  gather_facts: yes
+
+  tasks:
+    - name: Display the availble timestamp format in Ansible
+      tags: date
+      debug:
+        var=ansible_date_time.iso8601_basic_short
+
+- hosts: 6300T
   gather_facts: False
   roles:
     - role: arubanetworks.aoscx_role
   tasks:
-    - name: Create VLAN 50 - LAB50
-      aoscx_vlan:
-        vlan_id: 50
-        name: LAB50
+    - name:
+      tags: debug
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} {{ iso8601_basic_short.iso8601_basic_short }}"
+    - name:
+      tags: vlan
+      block:
+        - name: Create VLAN 44 - LAB44
+          tags: vlan
+          aoscx_vlan:
+            vlan_id: 44
+            name: LAB44
 
-    - name: Create VLAN 60 - LAB60
-      aoscx_vlan:
-        vlan_id: 60
-        name: LAB60
+        - name: Create VLAN 45 - LAB45
+          aoscx_vlan:
+            vlan_id: 45
+            name: LAB45
+
+
+        - name: Create L3 Interface vlan45
+          tags: svi
+          aoscx_l3_interface:
+            interface: vlan45
+            description: "vlan45 svi"
+            ipv4: ['10.0.45."{{ vlan45_svi }}"/24']
+
+    - name: Configure IPv4 ACL
+      tags: acl
+      block:
+        - name: Configure IP
+          aoscx_acl:
+            name: ipv4_acl
+            type: ipv4
+            acl_entries: "{{v4_acl_entries}}"
+
+        - name: Apply ipv4 ACL to interfaces
+          aoscx_acl_interface:
+            acl_name: ipv4_acl
+            acl_type: ipv4
+            acl_interface_list: "{{ v4_acl_interfaces }}"
+
+    - name: Copy running-config to backup checkpoint
+      tags: bak
+      aoscx_checkpoint:
+        source_config: 'running-config'
+        destination_config: 'checkpoint_20200128'
+
+  # Unconfigure
+    - name:
+      tags: remove
+      block:
+        - name: Deleting interface
+          aoscx_l3_interface:
+            interface: vlan45
+            state: 'delete'
+
+        - name: Deleting vlan
+          aoscx_vlan:
+            vlan_id: '45'
+            state: 'delete'
+
+- hosts: 6300T
+  gather_facts: False
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Pull Current Running Config through TFTP
+      tags: clibak
+      block:
+        - name: Pull Current Running Config through TFTP
+          aoscx_command:
+            commands:
+              - "show run"
+              # - "copy running-config tftp://{{tftp_server}}/{{inventory_hostname}}.cfg cli vrf mgmt"

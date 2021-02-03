@@ -1,4 +1,4 @@
-- hosts: cx_test
+- hosts: cx_6300s
   gather_facts: False
   roles:
   - role: arubanetworks.aoscx_role
