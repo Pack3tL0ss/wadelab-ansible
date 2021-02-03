@@ -1,0 +1,22 @@
+all:
+  children:
+    arubaos_cx:
+      children:
+        cx_8320s:
+          hosts:
+            8320T:
+              ansible_host: 10.0.30.41
+            8320B:
+              ansible_host: 10.0.30.42
+        cx_6200s:
+          hosts:
+            6200T:
+              ansible_host: 10.0.40.15
+            6200B:
+              ansible_host: 10.0.40.16
+        cx_6300s:
+          hosts:
+            6300T:
+              ansible_host: 192.168.40.21
+            6300B:
+              ansible_host: 192.168.40.22

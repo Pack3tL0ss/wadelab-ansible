@@ -1,0 +1,17 @@
+- hosts: cx_6300s
+  gather_facts: False
+  roles:
+  - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Create Banner
+      aoscx_banner:
+        banner_type: banner
+        banner: |
+          ___       __      _________    ______        ______
+          __ |     / /_____ ______  /_______  / ______ ___  /_
+          __ | /| / /_  __ `/  __  /_  _ \_  /  _  __ `/_  __ \
+          __ |/ |/ / / /_/ // /_/ / /  __/  /___/ /_/ /_  /_/ /
+          ____/|__/  \__,_/ \__,_/  \___//_____/\__,_/ /_.___/
+                  -You Shall Do No Harm Here!-
+
+

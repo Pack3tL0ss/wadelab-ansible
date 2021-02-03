@@ -1,0 +1,4 @@
+
+# General Vars
+user: "lastresort"        # Username for AOS-Switch Switches
+password: "hpIMC!!!"    # Password for AOS-Switch Switches

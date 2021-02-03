@@ -1,0 +1,14 @@
+- hosts: arubaos_cx
+  gather_facts: False
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Create VLAN 50 - LAB50
+      aoscx_vlan:
+        vlan_id: 50
+        name: LAB50
+
+    - name: Create VLAN 60 - LAB60
+      aoscx_vlan:
+        vlan_id: 60
+        name: LAB60
