@@ -32,7 +32,6 @@
             vlan_id: 45
             name: LAB45
 
-
         - name: Create L3 Interface vlan45
           tags: svi
           aoscx_l3_interface:
