@@ -1,0 +1,56 @@
+---
+- name: DNS configuration creation
+  aoscx_dns:
+    # mgmt_nameservers:
+    #   "Primary": "10.0.30.51"
+    #   "Secondary": "10.10.2.10"
+    dns_domain_name: "kabrew.com"
+    dns_domain_list:
+      0: "hpe.com"
+      1: "aruba.com"
+      2: "seach.com"
+    dns_name_servers:
+      0: "10.0.30.52"
+      1: "10.0.30.51"
+    dns_host_v4_address_mapping:
+      "host1": "5.5.44.5"
+      "host2": "2.2.44.2"
+    vrf: "green"
+
+- name: DNS configuration update
+  aoscx_dns:
+    # mgmt_nameservers:
+    #   "Primary": "10.10.2.15"
+    #   "Secondary": "10.10.2.25"
+    dns_domain_name: "kabrew.com"
+    dns_domain_list:
+      0: "hpe.com"
+      1: "aruba.com"
+      2: "seach.com"
+    dns_name_servers:
+      0: "10.0.30.51"
+      1: "10.0.30.52"
+    dns_host_v4_address_mapping:
+      "host1": "5.5.5.5"
+      "host2": "2.2.45.2"
+    vrf: "green"
+    state: update
+
+- name: DNS configuration deletion
+  aoscx_dns:
+    # mgmt_nameservers:
+    #   "Primary": "10.10.2.15"
+    #   "Secondary": "10.10.2.25"
+    dns_domain_name: "kabrew.com"
+    dns_domain_list:
+      0: "hpe.com"
+      1: "aruba.com"
+      2: "seach.com"
+    dns_name_servers:
+      0: "10.0.30.51"
+      1: "10.0.30.52"
+    dns_host_v4_address_mapping:
+      "host1": "5.5.5.5"
+      "host2": "2.2.45.2"
+    vrf: "green"
+    state: delete

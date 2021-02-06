@@ -1,0 +1,19 @@
+---
+- name: Apply ipv4 ACL to interfaces
+  aoscx_acl_interface:
+    acl_name: ipv4_acl
+    acl_type: ipv4
+    acl_interface_list: ["1/1/2", "1/2/23"]
+
+- name: Remove ipv4 ACL from interfaces
+  aoscx_acl_interface:
+    acl_name: ipv4_acl
+    acl_type: ipv4
+    acl_interface_list: ["1/1/2", "1/2/23"]
+    state: delete
+
+- name: Apply ipv6 ACL to Interfaces
+  aoscx_acl_interface:
+    acl_name: ipv6_acl
+    acl_type: ipv6
+    acl_interface_list: ["1/1/2", "1/2/23"]

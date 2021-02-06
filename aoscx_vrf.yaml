@@ -1,0 +1,66 @@
+---
+- name: Create VRF red
+  tags: create
+  aoscx_vrf:
+    name: red
+    state: create
+
+- name: Create VRF green
+  tags: create
+  aoscx_vrf:
+    name: green
+    state: create
+
+- name: Create VRF vrf2
+  tags: create
+  aoscx_vrf:
+    name: vrf2
+    state: create
+
+- name: Create VRF vrf3
+  tags: create
+  aoscx_vrf:
+    name: vrf3
+    state: create
+
+- name: Create VRF vrf4
+  tags: create
+  aoscx_vrf:
+    name: vrf4
+    state: create
+
+- name: Create VRF green
+  tags: create
+  aoscx_vrf:
+    name: green
+    state: create
+
+- name: Delete VRF red
+  tags: remove
+  aoscx_vrf:
+    name: red
+    state: delete
+
+- name: Delete VRF green
+  tags: remove
+  aoscx_vrf:
+    name: green
+    state: delete
+
+- name: Delete VRF vrf2
+  tags: remove
+  aoscx_vrf:
+    name: vrf2
+    state: delete
+
+- name: Delete VRF vrf3
+  tags: remove
+  aoscx_vrf:
+    name: vrf3
+    state: delete
+
+- name: Delete VRF vrf4
+  tags: remove
+  aoscx_vrf:
+    name: vrf4
+    state: delete

@@ -1,0 +1,55 @@
+---
+- name: Create IPv4 Static Route with VRF - Forwarding
+  tags: create
+  aoscx_static_route:
+    vrf_name: vrf2
+    destination_address_prefix: '1.1.1.0/24'
+    type: forward
+    distance: 1
+    next_hop_interface: '1/1/2'
+    next_hop_ip_address: '2.2.2.2'
+
+- name: Create IPv6 Static Route with VRF default - Forwarding
+  tags: create
+  aoscx_static_route:
+    destination_address_prefix: 3000:300::2/64
+    type: forward
+    next_hop_ip_address: 1000:100::2
+
+- name: Create Static Route with VRF - Blackhole
+  tags: create
+  aoscx_static_route:
+    vrf_name: vrf3
+    destination_address_prefix: '2.1.1.0/24'
+    type: blackhole
+
+- name: Create Static Route with VRF - Reject
+  tags: create
+  aoscx_static_route:
+    vrf_name: vrf4
+    destination_address_prefix: '3.1.1.0/24'
+    type: reject
+
+- name: Delete IPv6 Static Route with VRF default - Forwarding
+  tags: remove
+  aoscx_static_route:
+    destination_address_prefix: 3000:300::2/64
+    state: 'delete'
+
+- name: Delete Static Route with VRF - Forwarding
+  tags: remove
+  aoscx_static_route:
+    destination_address_prefix: '1.1.1.0/24'
+    state: 'delete'
+
+- name: Delete Static Route with VRF - Blackhole
+  tags: remove
+  aoscx_static_route:
+    destination_address_prefix: '2.1.1.0/24'
+    state: 'delete'
+
+- name: Delete Static Route with VRF - Reject
+  tags: remove
+  aoscx_static_route:
+    destination_address_prefix: '3.1.1.0/24'
+    state: 'delete'

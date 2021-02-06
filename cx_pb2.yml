@@ -1,13 +1,13 @@
 ---
-- hosts: localhost
-  become: no
-  gather_facts: yes
+# - hosts: localhost
+#   become: no
+#   gather_facts: yes
 
-  tasks:
-    - name: Display the availble timestamp format in Ansible
-      tags: date
-      debug:
-        var=ansible_date_time.iso8601_basic_short
+#   tasks:
+#     - name: Display the availble timestamp format in Ansible
+#       tags: date
+#       debug:
+#         var=ansible_date_time.iso8601_basic_short
 
 - hosts: 6300T
   gather_facts: False
@@ -17,7 +17,9 @@
     - name:
       tags: debug
       ansible.builtin.debug:
-        msg: "{{ inventory_hostname }} {{ iso8601_basic_short.iso8601_basic_short }}"
+        msg: "{{ lookup('pipe', 'date') }}  {{ lookup('pipe','date \"+%Y%m%d %S\"') }}{{ 99 | random }}  {{ inventory_hostname }}"
+        # msg: "{{ lookup('pipe', 'date') }}  {{ lookup('pipe','date \"+%Y%m%d%H%M%S\"') }}  {{ inventory_hostname }}"
+    # {{ iso8601_basic_short.iso8601_basic_short }}"
     - name:
       tags: vlan
       block:
@@ -56,9 +58,10 @@
 
     - name: Copy running-config to backup checkpoint
       tags: bak
+      run_once: yes
       aoscx_checkpoint:
         source_config: 'running-config'
-        destination_config: 'checkpoint_20200128'
+        destination_config: "bkup_{{ lookup('pipe','date \"+%Y%m%d%H%M%S\"') }}"
 
   # Unconfigure
     - name:

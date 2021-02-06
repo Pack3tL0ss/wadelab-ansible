@@ -1,0 +1,15 @@
+---
+- name: Copy running-config to startup-config
+  aoscx_checkpoint:
+    source_config: 'running-config'
+    destination_config: 'startup-config'
+
+- name: Copy startup-config to running-config
+  aoscx_checkpoint:
+    source_config: 'startup-config'
+    destination_config: 'running-config'
+
+- name: Copy running-config to backup checkpoint
+  aoscx_checkpoint:
+    source_config: 'running-config'
+    destination_config: 'checkpoint_20200128'

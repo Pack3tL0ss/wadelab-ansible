@@ -1,0 +1,40 @@
+---
+- name: Copy Running Config to local as JSON
+  aoscx_backup_config:
+    config_name: 'running-config'
+    output_file: '{{ out_dir }}/running-config.json'
+
+- name: Copy Startup Config to local as JSON
+  aoscx_backup_config:
+    config_name: 'startup-config'
+    output_file: '{{ out_dir }}/startup-config.json'
+
+- name: Copy Checkpoint Config to local as JSON
+  aoscx_backup_config:
+    config_name: 'checkpoint1'
+    output_file: '{{ out_dir }}/checkpoint1.json'
+
+- name: debug
+  debug:
+    msg: "{{ tftp_server }} {{ inventory_hostname }}"
+
+- name: Copy Running Config to TFTP server as JSON
+  aoscx_backup_config:
+    config_name: 'running-config'
+    remote_output_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname }}_running.json'
+    config_type: 'json'
+    vrf: '{{ tftp_src_vrf }}'
+
+- name: Copy Running Config to TFTP server as CLI
+  aoscx_backup_config:
+    config_name: 'running-config'
+    remote_output_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname }}_running.cli'
+    config_type: 'cli'
+    vrf: '{{ tftp_src_vrf }}'
+
+- name: Copy Startup Config to TFTP server as CLI
+  aoscx_backup_config:
+    config_name: 'startup-config'
+    remote_output_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname }}_startup.cli'
+    config_type: 'cli'
+    vrf: '{{ tftp_src_vrf }}'

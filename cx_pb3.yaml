@@ -1,0 +1,71 @@
+---
+- hosts: 6300T
+  gather_facts: False
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Include aoscx_banner.yaml
+      tags: banner
+      include: aoscx_banner.yaml
+
+    - name: Include aoscx_vrf.yaml
+      tags: vrf
+      include: aoscx_vrf.yaml
+
+    - name: Include aoscx_acl.yaml
+      include: aoscx_acl.yaml
+
+    - name: Include aoscx_acl_interface.yaml
+      include: aoscx_acl_interface.yaml
+
+    - name: Include aoscx_acl_vlan.yaml
+      include: aoscx_acl_vlan.yaml
+
+    - name: Include aoscx_backup_config.yaml
+      tags: backup
+      include: aoscx_backup_config.yaml
+
+    - name: Include aoscx_boot_firmware.yaml
+      include: aoscx_boot_firmware.yaml
+
+    - name: Include aoscx_checkpoint.yaml
+      include: aoscx_checkpoint.yaml
+
+    - name: Include aoscx_config.yaml
+      include: aoscx_config.yaml
+
+    - name: Include aoscx_dns.yaml
+      include: aoscx_dns.yaml
+
+    - name: Include aoscx_facts.yaml
+      tags: facts
+      include: aoscx_facts.yaml
+
+    - name: Include aoscx_l2_interface.yaml
+      include: aoscx_l2_interface.yaml
+
+    - name: Include aoscx_l3_interface.yaml
+      include: aoscx_l3_interface.yaml
+
+    - name: Include aoscx_static_route.yaml
+      include: aoscx_static_route.yaml
+
+    - name: Include aoscx_upload_config.yaml
+      include: aoscx_upload_config.yaml
+
+    - name: Include aoscx_upload_firmware.yaml
+      include: aoscx_upload_firmware.yaml
+
+    - name: Include aoscx_vlan.yaml
+      include: aoscx_vlan.yaml
+
+    - name: Include aoscx_vlan_interface.yaml
+      include: aoscx_vlan_interface.yaml
+
+- hosts: 6300T
+  gather_facts: False
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Include aoscx_command.yaml
+      include: aoscx_command.yaml

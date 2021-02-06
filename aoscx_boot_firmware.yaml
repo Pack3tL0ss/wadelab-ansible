@@ -1,0 +1,8 @@
+---
+- name: Boot to primary
+  aoscx_boot_firmware:
+    partition_name: 'primary'
+
+- name: Boot to secondary
+  aoscx_boot_firmware:
+    partition_name: 'secondary'

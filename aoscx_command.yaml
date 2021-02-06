@@ -1,0 +1,50 @@
+---
+# control maching known hosts file must contain cx devices pub_key
+# OR set host_key_checking = false in ansible.cfg
+- name: Execute show commands and configure commands, and output results to file in plaintext
+  aoscx_command:
+    commands: ['show run',
+      'show vsf',
+      'show interface 1/1/1',
+      'config',
+      'interface 1/1/2',
+        'no shut',
+        'ip address 10.10.10.10/24',
+        'routing',
+        'ip address 10.10.10.11/24',
+        'exit',
+      'vlan 2',
+      'end']
+    output_file: "{{ out_dir }}/configure.cfg"
+    output_file_format: plain-text
+
+- name: Send WadeLab aliases
+  tags: aliases
+  aoscx_command:
+    commands: "{{ aliases }}"
+    output_file: "{{ out_dir }}/aliases.cfg"
+    output_file_format: plain-text
+
+- name: Show running-config and show interface mgmt, and pass only if all (both) results match
+  aoscx_command:
+    commands:
+      - 'show run'
+      - 'show int mgmt'
+    wait_for:
+      - result[0] contains "vlan "
+      - result[1] contains "127.0.0.1"
+    match: all
+    retries: 5
+    interval: 5
+
+- name: Show all available commands and output them to a file (as JSON)
+  aoscx_command:
+    commands: ['list']
+    output_file: "{{ out_dir }}/config_list.cfg"
+
+- name: Run ping command with increased command timeout
+  vars:
+    - ansible_command_timeout: 60
+  aoscx_command:
+    commands:
+      - ping 10.80.2.120 vrf mgmt repetitions 100

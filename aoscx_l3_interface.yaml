@@ -1,0 +1,29 @@
+---
+- name: Creating new L3 interface 1/1/3 with IPv4 and IPv6 address on VRF red
+  aoscx_l3_interface:
+    interface: 1/1/3
+    description: Uplink Interface
+    ipv4: ['10.20.1.3/24']
+    ipv6: ['2000:db8::1234/64']
+    vrf: red
+
+- name: Creating new L3 interface 1/1/6 with IPv4 address on VRF default
+  aoscx_l3_interface:
+    interface: 1/1/6
+    ipv4: ['10.33.4.15/24']
+
+- name: Deleting L3 Interface - 1/1/3
+  aoscx_l3_interface:
+    interface: 1/1/3
+    state: delete
+
+- name: Create IP Helper Address on Interface 1/1/3
+  aoscx_l3_interface:
+    interface: 1/1/3
+    ip_helper_address: ['172.1.2.32']
+
+- name: Update IP Helper Address on Interface 1/1/3
+  aoscx_l3_interface:
+    interface: 1/1/3
+    ip_helper_address: ['172.1.5.44']
+    state: update

@@ -1,0 +1,23 @@
+---
+- name: Copy Running Config from local JSON file as JSON
+  aoscx_upload_config:
+    config_name: 'running-config'
+    remote_config_file_tftp_path: '/user/admin/{{ inventory_hostname ))_running.json'
+
+- name: Copy Running Config from TFTP server as JSON
+  aoscx_upload_config:
+    config_name: 'running-config'
+    remote_config_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname ))_running.json'
+    vrf: 'mgmt'
+
+- name: Copy CLI from TFTP Server to Running Config
+  aoscx_upload_config:
+    config_name: 'running-config'
+    remote_config_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname ))_running.cli'
+    vrf: 'mgmt'
+
+- name: Copy CLI from TFTP Server to Startup Config
+  aoscx_upload_config:
+    config_name: 'startup-config'
+    remote_config_file_tftp_path: 'tftp://{{ tftp_server }}/{{ inventory_hostname ))_startup.cli'
+    vrf: 'mgmt'

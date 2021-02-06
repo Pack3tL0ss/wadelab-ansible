@@ -1,0 +1,18 @@
+---
+- name: Retrieve all information from the device and save into a variable "facts_output"
+  aoscx_facts:
+  register: facts_output
+
+- name: Retrieve power supply and domain name info from the device
+  aoscx_facts:
+    gather_subset: ['power_supplies', 'domain_name']
+
+- name: Retrieve VRF info, host name, and fan info from the device and save into a variable
+  aoscx_facts:
+    gather_subset: ['host_name', 'fans']
+    gather_network_resources: ['vrfs']
+  register: facts_subset_output
+
+- name:
+  ansible.builtin.debug:
+    msg: "{{ facts_output }}"

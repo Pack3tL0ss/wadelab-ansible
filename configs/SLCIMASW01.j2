@@ -1,0 +1,419 @@
+!
+!export-password: default
+hostname {{ hostname }}
+{% if dns and dns.domain %}
+domain-name {{ dns.domain }}
+{% endif %}
+banner motd !
+
+
+WARNING :
+____________________________________________________________________
+To protect the system from unauthorized use and to ensure the
+system is functioning properly, activities are monitored, recorded
+and subject to audit. By using this system, you consent to such
+monitoring, recording and audit. Any unauthorized use, access,
+modification, or configuration of this system is strictly prohibited
+and is punishable to the maximum extent of the law, including civil
+and/or criminal penalties.
+____________________________________________________________________!
+{# -- // LOCAL ADMIN USERS \\ -- #}
+{% if local_users %}
+    {% for user in local_users %}
+        {% if local_users[user]["password"] %}
+user {{ user }} group {{ local_users[user]["group"]|default("administrators", true) }} password {{ local_users[user]["password"] }}
+        {% endif %}
+        {% if "ssh_keys" in local_users[user] %}
+            {% for key in local_users[user]["ssh_keys"] %}
+user {{ user }} authorized-key {{ key }}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+{# -- // TIMEZONE \\ -- #}
+{% if timezone %}
+clock timezone {{ timezone }}
+{% endif %}
+
+{# -- // ARUBA CENTRAL \\ -- #}
+{% if aruba_central is defined and not aruba_central %}
+aruba-central
+    disable
+{% endif %}
+
+{# -- // TIME/NTP \\ -- #}
+{%if ntp %}
+    {% if ntp["servers"] %}
+        {% for svr in ntp["servers"] %}
+ntp server {{ svr }}
+        {% endfor %}
+    {% endif %}
+ntp enable
+ntp vrf {{ ntp["vrf"]|default("default", true) }}
+{% endif %}
+!
+!
+!
+!
+{# -- // GLOBAL TACACS/RADIUS SETTINGS \\ -- #}
+{% if tacacs and tacacs.global %}
+    {% if tacacs.global.key %}
+tacacs-server key {{tacacs.global.key}}
+    {% endif %}
+{% endif %}
+!
+{% if radius and radius.global %}
+    {% if radius.global.key %}
+radius-server key {{radius.global.key}}
+    {% endif %}
+    {% if radius.global.timeout %}
+radius-server timeout {{radius.global.timeout}}
+    {% endif %}
+    {% if radius.global.retries %}
+radius-server retries {{radius.global.retries}}
+    {% endif %}
+    {% if radius.global.port %}
+radius-server port {{radius.global.port}}
+    {% endif %}
+    {% if radius.global.tls_timeout %}
+radius-server port {{radius.global.tls_timeout}}
+    {% endif %}
+    {% if radius.global.auth_type %}
+radius-server auth-type {{radius.global.auth_type}}
+    {% endif %}
+    {% if radius.global.service_type %}
+radius-server service-type {{radius.global.service_type}}
+    {% endif %}
+    {% if radius.global.tracking_user %}
+        {% set rad_line = "radius-server tracking user-name " + radius.global.tracking_user %}
+        {% if radius.global.tracking_pass %}
+            {% set rad_line = rad_line + " password " + radius.global.tracking_pass %}
+        {% endif %}
+{{rad_line}}
+    {% elif radius.global.tracking_pass %}
+radius-server tracking user-name radius-tracking-user password {{radius.global.tracking_pass}}
+    {% endif %}
+{% endif %}
+!
+{# -- // TACACS \\ -- #}
+{% if tacacs and tacacs.servers %}
+    {% for svr in tacacs.servers %}
+        {% if svr.vrf is defined %}
+tacacs-server host {{ svr.host }} vrf {{ svr.vrf }}
+        {% else %}
+            {% if tacacs.global.vrf %}
+tacacs-server host {{ svr.host }} vrf {{ tacacs.global.vrf }}
+            {% else %}
+tacacs-server host {{ svr.host }}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+!
+{# -- // RADIUS \\ -- #}
+{% if radius and radius.servers %}
+    {% set radius_groups = {} %}
+    {% for svr in radius.servers %}
+        {% set rad_line = "radius-server host " + svr.host %}
+        {% if radius.global.tracking is defined and radius.global.tracking %}
+            {% set rad_line = rad_line + " tracking enable" %}
+        {% endif %}
+        {% if svr.tracking is defined and svr.tracking %}
+            {% set rad_line = rad_line + " tracking enable" %}
+        {% endif %}
+        {% if radius.global.tracking_mode %}
+            {% set rad_line = rad_line + " tracking-mode " + radius.global.tracking_mode %}
+        {% endif %}
+        {% if svr.tracking_mode %}
+            {% set rad_line = rad_line + " tracking-mode " + svr.tracking_mode %}
+        {% endif %}
+        {% if svr.cppm_user is defined %}
+            {% set rad_line = rad_line + " clearpass-username " + svr.cppm_user + " clearpass-password " + svr.cppm_pass %}
+        {% else %}
+            {% if radius.global.cppm_user is defined %}
+                {% set rad_line = rad_line + " clearpass-username " + radius.global.cppm_user + " clearpass-password " + radius.global.cppm_pass %}
+            {% endif %}
+        {% endif %}
+        {% if svr.vrf is defined %}
+            {% set rad_line = rad_line + " vrf " + svr.vrf %}
+            {% set grp_line = "server " + svr.host + " vrf " + svr.vrf %}
+        {% else %}
+            {% if radius.global.vrf is defined %}
+                {% set rad_line = rad_line + " vrf " + radius.global.vrf %}
+                {% set grp_line = "server " + svr.host + " vrf " + radius.global.vrf %}
+            {% else %}
+                {% set grp_line = "server " + svr.host %}
+            {% endif %}
+        {% endif %}
+        {% if svr.key is defined %}
+            {% set rad_line = rad_line + " key " + svr.key %}
+        {% endif %}
+        {% if svr.secure is defined %}
+            {% set rad_line = rad_line + " secure " + svr.secure %}
+        {% elif radius.global.secure is defined %}
+            {% set rad_line = rad_line + " secure " + radius.global.secure %}
+        {% endif %}
+        {% if svr.group is defined %}
+            {% if radius_groups[svr.group] is not defined %}
+                {% set x = radius_groups.__setitem__(svr.group, []) %}
+            {% endif %}
+            {% set x = radius_groups[svr.group].append(grp_line) %}
+        {% endif %}
+{{ rad_line }}
+    {% endfor %}
+!
+{# -- // RADIUS GROUPS \\ -- #}
+    {% if radius_groups %}
+        {% for grp in radius_groups %}
+aaa group server radius {{ grp }}
+            {% for line in radius_groups[grp] %}
+    {{ line }}
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+{% endif %}
+{# -- // AAA \\ -- #}
+{% if aaa and aaa.lines %}
+    {% for line in aaa.lines %}
+{{ line }}
+    {% endfor %}
+{% endif %}
+!
+!
+{# -- // RFC 3576 \\ -- #}
+{% if radius.servers %}
+    {% for svr in radius.servers %}
+        {% if svr.rfc3576_key %}
+radius dyn-authorization client {{svr.host}} secret-key {{svr.rfc3576_key}}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{# -- // SYSLOG \\ -- #}
+{% for svr in syslog_servers %}
+    {% if svr.vrf is defined %}
+logging {{ svr.host }} vrf {{ svr.vrf }}
+    {% else %}
+logging {{ svr.host }}
+    {% endif %}
+{% endfor %}
+{# -- // SNMP \\ -- #}
+snmp-server vrf {{ snmp_vrf|default("default", true) }}
+{% if snmp_description %}
+snmp-server system-description {{ snmp_description }}
+{% else %}
+snmp-server system-description {{ hostname }}
+{% endif %}
+ssh server vrf default
+ssh server vrf mgmt
+{# -- // VSF \\ -- #}
+{% if vsf and vsf.members%}
+    {% if vsf.split_detect %}
+vsf split-detect {{ vsf.split_detect }}
+    {% endif %}
+    {% if vsf.secondary %}
+vsf secondary-member {{ vsf.secondary }}
+    {% endif %}
+    {% for mbr in vsf.members %}
+vsf member {{ mbr.member }}
+    type {{ mbr.type }}
+        {% if mbr.link1 %}
+    link 1 {{ mbr.link1 }}
+        {% endif %}
+        {% if mbr.link2 %}
+    link 2 {{ mbr.link2 }}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{# -- // VLANs \\ -- #}
+vlan 1
+{% for vlan in vlans %}
+vlan {{vlan.pvid}}
+    {% if vlan.name %}
+    name {{vlan.name}}
+    {% endif %}
+    {% if vlan.voice %}
+    voice
+    {% endif %}
+{% endfor %}
+{# -- // AAA Global \\ -- #}
+{% if aaa.dot1x_enable %}
+aaa authentication port-access dot1x authenticator
+    enable
+{% endif %}
+{% if aaa.mac_enable %}
+aaa authentication port-access mac-auth
+    enable
+{% endif %}
+{# -- // INTERFACEs \\ -- #}
+{% if interfaces %}
+    {% for i in interfaces %}
+interface {{ i }}
+        {% for line in interfaces[i] %}
+    {{ line }}
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+{# -- // VLAN INTERFACEs \\ -- #}
+interface vlan1
+    ip dhcp
+{% for vlan in vlans %}
+    {% if vlan.ip_mask %}
+interface vlan{{ vlan.pvid }}
+        {% if vlan.name %}
+    description {{ vlan.name }}
+        {% endif %}
+    ip address {{ vlan.ip_mask }}
+    {% if vlan.ipv6_mask %}
+    ipv6 address {{ vlan.ipv6_mask }}
+    {% endif %}
+        {% if vlan.ospf_proc %}
+    ip ospf {{ vlan.ospf_proc }} area {{ vlan.ospf_area|default('0.0.0.0') }}
+            {% if vlan.ospf_passive is defined %}
+                {% if vlan.ospf_passive %}
+    ip ospf passive
+                {% else %}
+    no ip ospf passive
+                {% endif %}
+            {% endif %}
+        {% endif %}
+        {% if vlan.igmp %}
+    ip igmp enable
+        {% endif %}
+        {% if vlan.pim_sm %}
+    ip pim-sparse enable
+        {% endif %}
+        {% if vlan.ip_mtu %}
+    ip mtu {{ vlan.ip_mtu }}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+!
+{# -- // VxLAN \\ -- #}
+{% for vx in vxlan %}
+interface vxlan {{ vx.id }}
+    {% if vx.source_ip %}
+    source ip {{ vx.source_ip }}
+    {% endif %}
+    {% if vx.shutdown is defined  %}
+        {% if vx.shutdown %}
+    shutdown
+        {% else %}
+    no shutdown
+        {% endif %}
+    {% endif %}
+    {% for vni in vx.vnis %}
+    vni {{ vni.id }}
+        vlan {{ vni.vlan }}
+    {% endfor %}
+{% endfor %}
+!
+{# -- // STP \\ -- #}
+{% if stp  %}
+    {% for stp_line in stp %}
+{{ stp_line }}
+    {% endfor %}
+{% endif %}
+{# -- // OOBM \\ -- #}
+interface mgmt
+{% if oobm  %}
+    {% for oobm_line in oobm %}
+    {{ oobm_line }}
+    {% endfor %}
+{% else %}
+    no shutdown
+    ip dhcp
+{% endif %}
+{# -- // UBT \\ -- #}
+{% if ubt and ubt.client_vlan %}
+ubt-client-vlan {{ ubt.client_vlan }}
+ubt zone {{ ubt.zone }} vrf {{ ubt.vrf|default('default', true) }}
+    primary-controller ip {{ ubt.primary }}
+    backup-controller ip {{ ubt.backup }}
+    {% if ubt.sac_hb %}
+    sac-heartbeat-interval {{ ubt.sac_hb }}
+    {% endif %}
+    {% if ubt.uac_ka %}
+    uac-keepalive-interval {{ ubt.uac_ka }}
+    {% endif %}
+    {% if ubt.enable is not defined or ubt.enable %}
+    enable
+    {% endif %}
+{% endif %}
+{# -- // SNMP \\ -- #}
+{% if snmp %}
+    {% for line in snmp %}
+{{ line }}
+    {% endfor %}
+{% endif %}
+{# -- // STATIC ROUTES \\ -- #}
+{% if static_routes %}
+    {% if static_routes["v4"] %}
+        {% for r in static_routes["v6"] %}
+ip route {{r}}
+        {% endfor %}
+    {% endif %}
+    {% if static_routes["v6"] %}
+        {% for r in static_routes["v6"] %}
+ip route {{r}}
+        {% endfor %}
+    {% endif %}
+{% endif %}
+{# -- // DNS \\ -- #}
+{% if dns %}
+    {% if dns.domain %}
+ip dns domain-name {{ dns.domain }}
+    {% endif %}
+    {% if dns.servers %}
+        {% for svr in dns.servers %}
+            {% if svr.vrfs is defined %}
+                {% if svr.vrfs is not string %}
+                    {% for vrf in svr.vrfs %}
+                        {% if vrf != "default" %}
+ip dns server-address {{ svr.host }} vrf {{ vrf }}
+                        {% else %}
+ip dns server-address {{ svr.host }}
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    {% if svr.vrfs != "default" %}
+ip dns server-address {{ svr.host }} vrf {{ svr.vrfs }}
+                    {% else %}
+ip dns server-address {{ svr.host }}
+                    {% endif %}
+                {% endif %}
+            {% else %}
+ip dns server-address {{ svr.host }}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endif %}
+!
+!
+!
+!
+{# -- // BGP \\ -- #}
+{% if bgp %}
+    {% for b in bgp %}
+router bgp {{ b.as }}
+        {% if b.lines %}
+            {% for line in b.lines %}
+    {{ line }}
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+!
+{# -- // IP SOURCE \\ -- #}
+{# var should be <ip address> or "interface <interface>" #}
+{% if ubt and ubt.source %}
+ip source-interface ubt {{ ubt.source }}
+{% endif %}
+{% if radius and radius.global and radius.global.source %}
+ip source-interface radius {{ radius.global.source }}
+{% endif %}
+{% if tacacs and tacacs.global and tacacs.global.source %}
+ip source-interface tacacs {{ tacacs.global.source }}
+{% endif %}
+https-server vrf default
+https-server vrf mgmt
