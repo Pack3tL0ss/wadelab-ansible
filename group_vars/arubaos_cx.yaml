@@ -1,8 +1,8 @@
 ---
 ansible_user: wade
 ansible_password: 'hpIMC!!!'
-# ansible_connection: httpapi
-ansible_connection: network_cli
+ansible_connection: httpapi
+# ansible_connection: network_cli
 ansible_network_os: aoscx
 ansible_httpapi_use_ssl: True
 ansible_acx_no_proxy: True
@@ -35,3 +35,9 @@ v4_acl_entries:
     src_ip: 0.0.0.0/0.0.0.0}
 
 v4_acl_interfaces: ["vlan45", "vlan44"]
+
+ansible_user: admin
+ansible_password: admin
+ansible_net_user: admin
+ansible_net_password: admin
+ansible_connection: local

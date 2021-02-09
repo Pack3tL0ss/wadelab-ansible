@@ -157,8 +157,9 @@ static_routes:
     - "::/0 2001:5b0:3eff:fff6::1"
 
 snmp:
-  - "snmp-server community jupcom"
-  - "snmp-server host 10.41.254.15 inform version v2c community jupcom"
+  include: snmpj2.j2
+  # - "snmp-server community jupcom"
+  # - "snmp-server host 10.41.254.15 inform version v2c community jupcom"
 
 # simplified interface variable concat shown below requires custom parser
 interfaces:

@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2017 Hewlett Packard Enterprise Development LP
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the License for the
+# specific language governing permissions and limitations
+# under the License.
+
+# - hosts: localhost
+#   connection: local
+#   gather_facts: no
+
+  # tasks:
+  #   # Store Global variables. These are also used by other plays in this playbook
+  #   - name: Store Global variables in localhost
+  #     block:
+  #       - set_fact:
+  #           site_data: "{{ hostvars.groups.local }}"
+        # - set_fact:
+        #     cx_group_name: "{{ site_data.cx_group_name }}"  # Group for the CX
+        #     sw_group_name: "{{ site_data.sw_group_name }}"  # Group for the Switches
+
+
+- hosts: 6300T
+  gather_facts: no
+  connection: local
+  # vars:
+  #   file_contents: "{{lookup('file', './configs/SLCIMASW01.yaml')}}"
+  tasks:
+    - name: get vars
+      include_vars:
+        file: "./configs/{{ hostname }}.yaml"
+
+    - name: Display all variables/facts known for a host
+      ansible.builtin.debug:
+        var: hostvars[inventory_hostname]
+        verbosity: 4
+
+    # Create configuration file for arubaos-cx config
+    - name: Create cx-switch config file
+      block:
+        - set_fact: cx_config_file="./configs/{{ hostname }}.conf"
+        - name: Create AOS-CX Configuration File
+          template: src="./configs/{{ hostname }}.j2" dest={{cx_config_file}}
+          register: cx_base_conf
+
