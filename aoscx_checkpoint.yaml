@@ -1,15 +1,18 @@
 ---
 - name: Copy running-config to startup-config
+  tags: run-start
   aoscx_checkpoint:
     source_config: 'running-config'
     destination_config: 'startup-config'
 
 - name: Copy startup-config to running-config
+  tags: start-run
   aoscx_checkpoint:
     source_config: 'startup-config'
     destination_config: 'running-config'
 
 - name: Copy running-config to backup checkpoint
+  tags: bak
   aoscx_checkpoint:
     source_config: 'running-config'
-    destination_config: 'checkpoint_20200128'
+    destination_config: "bkup_{{ lookup('pipe','date \"+%Y%m%d%H%M%S\"') }}"

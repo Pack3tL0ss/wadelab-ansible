@@ -8,4 +8,4 @@
 - name: Upload firmware to secondary through local
   aoscx_upload_firmware:
     partition_name: 'secondary'
-    firmware_file_path: '/tftpboot/TL_10_04_0030A.swi'
+    firmware_file_path: '{{tftp_dir}}/{{img_file}}'

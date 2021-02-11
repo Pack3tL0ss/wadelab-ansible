@@ -37,9 +37,10 @@
       ansible.builtin.debug:
         var: "{{ golden.stat }}"
         verbosity: 4
-    # - name: Restore Stored Golden Config to Running through TFTP
-    #   aoscx_upload_config:
-    #     config_name: 'running-config'
-    #     remote_config_file_tftp_path: 'tftp://192.168.1.2/switch_config.conf'
-    #     vrf: 'mgmt'
-    #   when:  golden_sha != running_sha
+
+    - name: Restore Stored Golden Config to Running through TFTP
+      aoscx_upload_config:
+        config_name: 'running-config'
+        remote_config_file_tftp_path: 'tftp://{{tftp_server}}/switch_config.conf'
+        vrf: '{{tftp_src_vrf}}'
+      when:  golden_sha != running_sha

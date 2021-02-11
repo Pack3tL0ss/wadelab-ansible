@@ -1,8 +1,10 @@
 ---
 - name: Boot to primary
+  tags: primary
   aoscx_boot_firmware:
     partition_name: 'primary'
 
 - name: Boot to secondary
+  tags: secondary
   aoscx_boot_firmware:
     partition_name: 'secondary'

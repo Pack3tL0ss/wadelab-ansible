@@ -4,6 +4,12 @@
   roles:
     - role: arubanetworks.aoscx_role
   tasks:
+    - name: Display all variables/facts known for a host
+      tags: dump
+      debug:
+        var: hostvars[inventory_hostname]
+        verbosity: 4
+
     - name: Include aoscx_banner.yaml
       tags: banner
       include: aoscx_banner.yaml
@@ -13,12 +19,15 @@
       include: aoscx_vrf.yaml
 
     - name: Include aoscx_acl.yaml
+      tags: acl
       include: aoscx_acl.yaml
 
     - name: Include aoscx_acl_interface.yaml
+      tags: acl_iface
       include: aoscx_acl_interface.yaml
 
     - name: Include aoscx_acl_vlan.yaml
+      tags: acl_vlan
       include: aoscx_acl_vlan.yaml
 
     - name: Include aoscx_backup_config.yaml
@@ -26,15 +35,19 @@
       include: aoscx_backup_config.yaml
 
     - name: Include aoscx_boot_firmware.yaml
+      tags: set_boot
       include: aoscx_boot_firmware.yaml
 
     - name: Include aoscx_checkpoint.yaml
+      tags: checkpoint
       include: aoscx_checkpoint.yaml
 
     - name: Include aoscx_config.yaml
+      tags: flow
       include: aoscx_config.yaml
 
     - name: Include aoscx_dns.yaml
+      tags: dns
       include: aoscx_dns.yaml
 
     - name: Include aoscx_facts.yaml
@@ -42,24 +55,31 @@
       include: aoscx_facts.yaml
 
     - name: Include aoscx_l2_interface.yaml
+      tags: l2iface
       include: aoscx_l2_interface.yaml
 
     - name: Include aoscx_l3_interface.yaml
+      tags: l3iface
       include: aoscx_l3_interface.yaml
 
     - name: Include aoscx_static_route.yaml
+      tags: static-route
       include: aoscx_static_route.yaml
 
     - name: Include aoscx_upload_config.yaml
+      tags: upld-config
       include: aoscx_upload_config.yaml
 
     - name: Include aoscx_upload_firmware.yaml
+      tags: upld-fw
       include: aoscx_upload_firmware.yaml
 
     - name: Include aoscx_vlan.yaml
+      tags: vlan
       include: aoscx_vlan.yaml
 
     - name: Include aoscx_vlan_interface.yaml
+      tags: vlan-iface
       include: aoscx_vlan_interface.yaml
 
 - hosts: 6300T
@@ -68,4 +88,5 @@
     - role: arubanetworks.aoscx_role
   tasks:
     - name: Include aoscx_command.yaml
+      tags: commands
       include: aoscx_command.yaml

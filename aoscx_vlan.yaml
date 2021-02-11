@@ -1,38 +1,38 @@
 ---
 - name: Create VLAN 100 with description and name
-  tags: create
+  tags: create-vlan
   aoscx_vlan:
     vlan_id: 100
     name: VLAN100
     description: This is VLAN 100
 
 - name: Create VLAN 200 with description
-  tags: create
+  tags: create-vlan
   aoscx_vlan:
     vlan_id: 200
     description: This is VLAN 200
 
 - name: Create VLAN 300 with description and name
-  tags: create
+  tags: create-vlan
   aoscx_vlan:
     vlan_id: 300
     name: UPLINK_VLAN
     description: This is VLAN 300
 
 - name: Delete VLAN 100
-  tags: remove
+  tags: remove-vlan
   aoscx_vlan:
     vlan_id: 100
     state: delete
 
 - name: Delete VLAN 200
-  tags: remove
+  tags: remove-vlan
   aoscx_vlan:
     vlan_id: 200
     state: delete
 
 - name: Delete VLAN 300
-  tags: remove
+  tags: remove-vlan
   aoscx_vlan:
     vlan_id: 300
     state: delete
