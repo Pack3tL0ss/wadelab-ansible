@@ -1,0 +1,13 @@
+---
+- hosts: 6300T
+  roles:
+    - role: arubanetworks.aoscx_role
+  tasks:
+    - name: Upload firmware to primary through local file
+      aoscx_upload_firmware:
+        partition_name: 'primary'
+        firmware_file_path: '/var/lib/tftpboot/{{image_name}}.swi'
+
+    - name: Boot to primary
+      aoscx_boot_firmware:
+        partition_name: 'primary'

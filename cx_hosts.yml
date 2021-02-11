@@ -26,3 +26,7 @@ all:
               ansible_host: 10.0.40.16
             6300B:
               ansible_host: 192.168.40.22
+        # local:
+        #   hosts:
+        #     6300T:
+        #       ansible_host: 192.168.40.21

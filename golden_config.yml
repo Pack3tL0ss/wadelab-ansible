@@ -1,101 +1,45 @@
 ---
-- hosts: all
-  gather_facts: False
-  vars:
-    tftp_server: 10.100.1.100
-    config_path: "/var/lib/tftpboot/"
-    golden_config_file: "{{inventory_hostname}}.conf"
-    temp_config_file: "temp_{{inventory_hostname}}.conf"
-    golden_config_path: "{{config_path}}{{golden_config_file}}"
-    temp_config_path: "{{config_path}}{{temp_config_file}}"
+# ansible_connection should be httpapi
+- hosts: 6300T
+  roles:
+    - role: arubanetworks.aoscx_role
   tasks:
-    - name: Push generated config {{golden_config_file}} to {{inventory_hostname}}
-      block:
-        - name: Generate Config for {{inventory_hostname}}
-          template: src="{{config_template}}" dest="{{temp_config_path}}" mode='0777'
-      tags: generate
+    - name: Display all variables/facts known for a host
+      ansible.builtin.debug:
+        var: hostvars[inventory_hostname]
+        verbosity: 4
 
-    - name:
-      block:
-        - name: Check if GOLDEN config file exists
-          stat:
-            path: "{{golden_config_path}}"
-          register: golden_file
+    - name: Copy Running Config to TFTP server as Temporary Config
+      aoscx_backup_config:
+        config_name: 'running-config'
+        config_type: 'cli'
+        remote_output_file_tftp_path: 'tftp://{{tftp_server}}/{{hostname}}_temp_config.cli'
+        # output_file: '{{out_dir}}/{{hostname}}_running.cli'
+        vrf: '{{tftp_src_vrf}}'
 
-        - name: Create GOLDEN config file locally if it doesn't exist
-          local_action:
-            module: file
-            path: "{{golden_config_path}}"
-            state: touch
-            mode: '0777'
-          when: golden_file.stat.exists == False
+    - name: Get checksum of stored GOLDEN config
+      stat:
+        path : "configs/{{hostname}}.cli"
+        checksum_algorithm: sha256
+      register: golden
 
-        - name: Copy Generated Temp Config to Running through TFTP
-          arubaos_cx_ssh_cli:
-            ip: "{{ip | default(ansible_host)}}"
-            user: "{{user | default(ansible_user)}}"
-            password: "{{password | default(ansible_password)}}"
-            commands: ["copy tftp://{{tftp_server}}/{{temp_config_file}} running-config vrf mgmt"]
-          ignore_errors: True
+    - name: Get checksum of pulled RUNNING config
+      stat:
+        path : "{{tftp_dir}}/{{hostname}}_temp_config.cli"
+        checksum_algorithm: sha256
+      register: running
 
-        - name: Pull Running Config through TFTP store as GOLDEN
-          arubaos_cx_ssh_cli:
-            ip: "{{ip | default(ansible_host)}}"
-            user: "{{user | default(ansible_user)}}"
-            password: "{{password | default(ansible_password)}}"
-            commands: ["copy running-config tftp://{{tftp_server}}/{{golden_config_file}} cli vrf mgmt"]
-      tags: push_generated
+    - set_fact:
+        golden_sha: "{{ golden.stat.checksum }}"
+        running_sha: "{{ running.stat.checksum }}"
 
-    - name:
-      block:
-        - name: Copy Stored Golden Config to Running through TFTP
-          arubaos_cx_ssh_cli:
-            ip: "{{ip | default(ansible_host)}}"
-            user: "{{user | default(ansible_user)}}"
-            password: "{{password | default(ansible_password)}}"
-            commands: ["erase startup", "copy tftp://{{tftp_server}}/{{golden_config_file}} startup vrf mgmt", "copy startup running"]
-          ignore_errors: True
-      tags: push_golden
-
-    - name: Check golden config against running
-      block:
-        - name: Pull Current Running Config through TFTP
-          arubaos_cx_ssh_cli:
-            ip: "{{ip | default(ansible_host)}}"
-            user: "{{user | default(ansible_user)}}"
-            password: "{{password | default(ansible_password)}}"
-            commands: ["copy running-config tftp://{{tftp_server}}/{{temp_config_file}} cli vrf mgmt"]
-          ignore_errors: True
-
-        - name: Get checksum of stored GOLDEN config
-          stat:
-            path : "{{golden_config_path}}"
-            checksum_algorithm: sha256
-          register: golden
-
-        - name: Get checksum of pulled RUNNING config
-          stat:
-            path : "{{temp_config_path}}"
-            checksum_algorithm: sha256
-          register: running
-
-        - set_fact:
-            golden_sha: "{{ golden.stat.checksum }}"
-            running_sha: "{{ running.stat.checksum }}"
-
-        - name: Validate Running config is the same as stored Golden
-          fail:
-            msg: "Running Configuration {{temp_config_path}} differs from stored config {{golden_config_path}}"
-          when:  golden_sha != running_sha
-
-      rescue:
-        - name: Restore Stored Golden Config to Running through TFTP
-          arubaos_cx_ssh_cli:
-            ip: "{{ip | default(ansible_host)}}"
-            user: "{{user | default(ansible_user)}}"
-            password: "{{password | default(ansible_password)}}"
-            commands: ["erase startup", "copy tftp://{{tftp_server}}/{{golden_config_file}} startup-config vrf mgmt", "copy startup running"]
-          ignore_errors: True
-          when:  golden_sha != running_sha
-          tags: push
-      tags: check
+    - name: Display all variables/facts known for a host
+      ansible.builtin.debug:
+        var: "{{ golden.stat }}"
+        verbosity: 4
+    # - name: Restore Stored Golden Config to Running through TFTP
+    #   aoscx_upload_config:
+    #     config_name: 'running-config'
+    #     remote_config_file_tftp_path: 'tftp://192.168.1.2/switch_config.conf'
+    #     vrf: 'mgmt'
+    #   when:  golden_sha != running_sha

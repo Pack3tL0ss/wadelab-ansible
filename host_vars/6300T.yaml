@@ -1,2 +1,4 @@
 vlan45_svi: 21
 hostname: SLCIMASW01
+# host_vars:
+#   include: "/home/wade/git/myrepos/wadelab-ansible/configs/{{hostname}}.yaml"

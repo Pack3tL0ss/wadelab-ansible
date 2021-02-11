@@ -303,7 +303,3 @@ interfaces:
       - description Trunk to MGMT LAN SW 2
       - vlan trunk native 1
       - vlan trunk allowed 400-404,430,440,450,460,471-472,475-477,480-486,490
-
-
-
-
