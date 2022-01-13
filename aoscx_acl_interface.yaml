@@ -4,6 +4,7 @@
     acl_name: ipv4_acl
     acl_type: ipv4
     acl_interface_list: ["1/1/2", "1/2/23"]
+  when: st
 
 - name: Remove ipv4 ACL from interfaces
   aoscx_acl_interface:
