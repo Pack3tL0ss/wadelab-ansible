@@ -1,0 +1,25 @@
+- hosts: core
+  collections:
+    - arubanetworks.aoscx
+  vars:
+    ansible_python_interpreter: /usr/bin/python3    
+  gather_facts: False
+  tasks:
+    - name: Configure L3 interface 1/1/50 with IPv4 and IPv6 address
+      aoscx_l3_interface:
+        interface: 1/1/50
+        description: Uplink Interface
+        # ipv4: ['10.25.1.1/24']
+        # ipv6: ['2000:db8::1234/64']
+
+    - name: Configure IP Helper Address on Interface 1/1/50
+      aoscx_l3_interface:
+        interface: 1/1/50
+        ip_helper_address: ['10.0.30.51']        
+
+    - name: Configure L3 interface 1/1/49 with IPv4 and shutdown
+      aoscx_l3_interface:
+        interface: 1/1/49
+        description: Downlink Interface
+        ipv4: ['172.138.23.3/24']
+        admin_state: down
